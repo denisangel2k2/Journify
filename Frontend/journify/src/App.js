@@ -1,9 +1,11 @@
-import logo from './logo.svg';
-import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AuthCallbackPage from './pages/Callback';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import './styles/shared.module.scss';
+
+
+
 
 function App() {
   return (

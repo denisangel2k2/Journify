@@ -1,0 +1,44 @@
+@use '../shared.module.scss' as shared;
+
+.main-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns */
+    grid-template-rows: repeat(3, 1fr); /* 3 rows */
+    width: 55vw;
+    height: 55vh;
+    padding: 3rem; /* padding to maintain distance from container edges */
+}
+
+.journal-cell{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 11rem;
+    min-height: 7.3rem;
+    width: 11rem;
+    height: 7.3rem;
+    background-color: shared.$dark-color;
+    border-radius: 1rem;
+    &:hover{
+        transform: scale(1.03);
+        transition: 0.25s ease-in-out;
+        cursor: pointer;
+    }
+    &:not(:hover){
+        transform: scale(1);
+        transition: 0.25s ease-in-out;
+    }
+    img {
+        width: 93%;
+        height: 93%;
+        border-radius: 1rem 0 1rem;
+        object-fit: cover;
+    }
+}
+.home-background {
+    position: sticky;
+    background-color: black;
+    width: 100vw;
+    height: 100vh;
+}
+
