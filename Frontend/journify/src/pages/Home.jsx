@@ -2,6 +2,8 @@ import React, {useState,useEffect} from 'react';
 import '../styles/components/home.scss';
 import JournalCell from "../components/home-components/JournalCell";
 import { Modal } from 'react-bootstrap';
+import UserContainer from '../components/home-components/UserContainer';
+import TableHistory from '../components/home-components/TableHistory';
 
 export const Home = () => {
   const [cells,setCells] = useState([]);
@@ -49,15 +51,21 @@ export const Home = () => {
           </Modal.Footer>
       </Modal>  
       <div class="home-background">
-        <div className="main-container">
-          {cells.map(cell => (
-            <JournalCell
-              key={cell.id}
-              item={cell}
-              onClick={() => handleClickOnCell(cell)}
-            />
-          ))}
+        <div className="upper-container">
+          <UserContainer/>
+          <div className="main-container">
+            <div className="table-container">
+              {cells.map(cell => (
+                <JournalCell
+                  key={cell.id}
+                  item={cell}
+                  onClick={() => handleClickOnCell(cell)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
+        <TableHistory/>
       </div>
       
     </>
