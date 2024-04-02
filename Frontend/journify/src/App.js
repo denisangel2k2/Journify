@@ -7,8 +7,6 @@ import { AuthProvider } from './providers/AuthProvider';
 import { useAuth } from './providers/AuthProvider';
 import { Navigate } from 'react-router-dom';
 
-
-
 function App() {
   return (
     <BrowserRouter>
