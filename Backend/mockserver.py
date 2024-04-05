@@ -19,6 +19,7 @@ import time
 from tempfile import TemporaryDirectory
 from torchvision import datasets, models, transforms
 from sklearn.preprocessing import minmax_scale
+from pymongo import MongoClient
 
 
 
@@ -90,6 +91,17 @@ transform=transforms.Compose([
 ])
 #db=MyDataset('./Research/ModelTraining/data/1200songs2_test/',transform=transform)
 
+client = MongoClient('mongodb://localhost:27017/')
+db = client['journify']
+collection = db['journals']
+
+collection.insert_one({'title': 'test', 'content': 'test', 'mood': 0})
+
+for document in collection.find():
+    print(document)
+    
+
+
 @app.route('/login')
 def login():
     scope='user-read-private,user-read-email,playlist-read-private'
@@ -122,32 +134,6 @@ def callback():
         expires= response.json()['expires_in']
         expires += datetime.datetime.now().timestamp()
         return redirect(f'http://localhost:3000/callback?access_token={access_token}&expires_in={expires}')
-    
-
-@app.route('/playlists')
-def get_playlists():
-    access_token = request.headers.get('Authorization')
-    sp = spotipy.Spotify(auth=access_token)
-    playlists = sp.current_user_playlists()
-    #get top song name and danceability for each song in the playlist
-    results = []
-    for playlist in playlists['items']:
-        print(playlist['name'])
-        playlist_id = playlist['id']
-        playlist_name = playlist['name']
-        playlist_tracks = sp.playlist_tracks(playlist_id)
-        tracks = []
-        for track in playlist_tracks['items']:
-            track_id = track['track']['id']
-            track_name = track['track']['name']
-            track_features = sp.audio_features(track_id)
-            if track_features:
-                danceability = track_features[0]['danceability']
-                tracks.append({'id': track_id, 'name': track_name, 'danceability': danceability})
-                break
-        results.append({'id': playlist_id, 'name': playlist_name, 'tracks': tracks})
-
-    return jsonify(results)
 
 
 @app.route('/songs')

@@ -18,9 +18,11 @@ body {
     0% {
         background-position: 0% 0%;
     }
-    50% {    
+
+    50% {
         background-position: 100% 100%;
     }
+
     100% {
         background-position: 0% 0%;
     }
@@ -28,7 +30,7 @@ body {
 }
 
 .wave {
-    background: darken($color: shared.$main-color, $amount: 15%);//rgba(8, 6, 6, 0.23);
+    background: darken($color: shared.$main-color, $amount: 15%); //rgba(8, 6, 6, 0.23);
     border-radius: 1000% 1000% 0 0;
     position: fixed;
     width: 200%;
@@ -57,19 +59,19 @@ body {
     2% {
         transform: translateX(1);
     }
-    
+
     25% {
         transform: translateX(-25%);
     }
-    
+
     50% {
         transform: translateX(-50%);
     }
-    
+
     75% {
         transform: translateX(-25%);
     }
-    
+
     100% {
         transform: translateX(1);
     }
@@ -91,6 +93,7 @@ body {
     overflow: hidden;
     z-index: 1;
     margin-top: 3rem;
+
     &:after {
         content: '';
         position: absolute;
@@ -102,6 +105,7 @@ body {
         border-radius: 10rem;
         z-index: -2;
     }
+
     &:before {
         content: '';
         position: absolute;
@@ -114,15 +118,17 @@ body {
         border-radius: 10rem;
         z-index: -1;
     }
+
     &:hover {
         color: #fff;
+
         &:before {
             width: 100%;
         }
     }
 }
 
-.login-module { 
+.login-module {
     position: relative;
     background-color: shared.$darkest-color;
     width: 53vw;
@@ -142,13 +148,16 @@ body {
         font-size: 1.2rem;
     }
 }
+
 .main-title {
     margin-top: 5rem;
     font-size: 4rem !important;
-    p{
+
+    p {
         margin-bottom: 0;
     }
 }
+
 .login-cloud {
     position: absolute;
     top: -8%;
@@ -161,7 +170,8 @@ body {
     text-align: center;
     border-radius: 3.2rem;
     box-shadow: 0 0 1rem .3rem rgba(0, 0, 0, 0.2);
-    .medium-circle{
+
+    .medium-circle {
         position: absolute;
         background-color: #fff;
         width: 1.5rem;
@@ -172,7 +182,8 @@ body {
         left: -.6rem;
         box-shadow: 0 0 1rem .3rem rgba(0, 0, 0, 0.2);
     }
-    .small-circle{
+
+    .small-circle {
         position: absolute;
         background-color: #fff;
         width: 1rem;
@@ -183,17 +194,20 @@ body {
         left: -2rem;
         box-shadow: 0 0 1rem .3rem rgba(0, 0, 0, 0.2);
     }
+
     animation: scale 1s infinite;
+
     @keyframes scale {
         0% {
             transform: scale(1.03) rotate(-10deg);
         }
+
         50% {
             transform: scale(1) rotate(-10deg);
         }
+
         100% {
             transform: scale(1.03) rotate(-10deg);
         }
     }
 }
-
