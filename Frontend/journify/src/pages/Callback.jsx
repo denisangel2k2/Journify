@@ -8,11 +8,9 @@ const AuthCallbackPage = () => {
         const expiresIn = urlParams.get('expires_in');
 
         if (accessToken) {
-            // localStorage.setItem('accessToken', accessToken);
-            login(accessToken);
+            login(accessToken); 
             localStorage.setItem('expiresIn', expiresIn);
         }
-        //window.location.href = '/home';
 
     }, []);
 

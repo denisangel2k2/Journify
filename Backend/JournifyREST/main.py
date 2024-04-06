@@ -7,10 +7,14 @@ import spotipy
 import urllib
 import json
 from dotenv import load_dotenv
+
+from classification.CNNClassifier import CNNClassifier
 from model.Journal import Journal, Question
 from flask_mongoengine import MongoEngine
 
+from services.features_extractor import FeaturesExtractor
 from services.journal_services import JournalService
+from services.spotify_services import SpotifyService
 
 SPOTIFY_REDIRECT_URI = 'http://localhost:8888/callback'
 SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
@@ -18,6 +22,13 @@ SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 API_BASE_URL = 'https://api.spotify.com/v1/'
+
+
+spotifyService = SpotifyService()
+journalService = JournalService()
+featuresExtractor = FeaturesExtractor()
+cnnClassifier = CNNClassifier()
+
 
 app = Flask(__name__)
 
@@ -97,25 +108,60 @@ def post_journal():
 
 @app.route('/journal', methods=['PUT'])
 def get_journal():
+    # token = request.headers.get('Authorization')
+    # email, spotify_id = spotifyService.getInstance().getEmailAndSpotifyId(token)
+
     email = request.json['email']
     spotify_id = request.json['spotify_id']
 
-    journal = Journal.objects(spotify_id=spotify_id, email=email).first()
+    journal = Journal.objects(spotify_id=spotify_id, email=email).order_by('-date').first()
     if not journal:
-        JournalService.createJournal(email, spotify_id)
+        journalService.getInstance().createJournal(email, spotify_id)
     else:
         #get date timestamp
         date = journal.date
         #get current date timestamp
         current_date = datetime.datetime.now().timestamp()
         #compare if there has been 24 hours since the last journal entry
-        if current_date - date > 86400:
-            journal = JournalService.createJournal(email, spotify_id)
+        if current_date - date > 100:
+            journal = journalService.getInstance().createJournal(email, spotify_id)
 
 
-    journal = Journal.objects(spotify_id=spotify_id, email=email, date__gt=10).exclude('id').first()
+    journal = Journal.objects(spotify_id=spotify_id, email=email, date__gt=10).order_by('-date').exclude('id').first()
     journal = json.loads(journal.to_json())
     return journal
+
+@app.route('/history', methods=['GET'])
+def get_history():
+    # token = request.headers.get('Authorization')
+    # email, spotify_id = spotifyService.getInstance().getEmailAndSpotifyId(token)
+
+    email = request.json['email']
+    spotify_id = request.json['spotify_id']
+
+    journals = Journal.objects(email=email, spotify_id=spotify_id).exclude('id').all()
+    journals = json.loads(journals.to_json())
+    return journals
+
+@app.route('/forwardsong', methods=['POST'])
+def feed_forward_song():
+    song = request.json['song']
+    return spotifyService.getInstance().downloadMp3(song)
+
+@app.route('/classify', methods=['POST'])
+def classify():
+    song = request.json['song']
+    path = spotifyService.getInstance().downloadMp3(song)
+    features = featuresExtractor.getInstance().cnnFeatures(path)
+    prediction = cnnClassifier.classify(features)
+    return prediction
+
+@app.route('/user', methods=['GET'])
+def get_user_info():
+    token = request.headers.get('Authorization')
+    userDetails = spotifyService.getInstance().getUserDetails(token)
+    return userDetails
+
 
 
 if __name__ == '__main__':

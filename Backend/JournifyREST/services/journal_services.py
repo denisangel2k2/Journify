@@ -6,9 +6,16 @@ import random
 
 
 class JournalService:
+    _instance = None
 
-    @staticmethod
-    def createJournal(email, spotify_id):
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def getInstance(self):
+        return self._instance
+    def createJournal(self, email, spotify_id):
         generated_questions = []
         for i in range(12):
             random_index = random.randint(0, len(questions)-1)

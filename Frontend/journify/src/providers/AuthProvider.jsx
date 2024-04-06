@@ -7,6 +7,7 @@ const AuthContext = React.createContext();
 
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useLocalStorage("token", null);
+    const [userInfo, setUserInfo] = useLocalStorage("userInfo", null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -15,25 +16,43 @@ export const AuthProvider = ({ children }) => {
         } else {
             navigate('/');
         }
-    }, [token]); // might need to remove token from here
+    }, [token]); 
 
-    const login = (token) => {
+    const login = async (token) => {
         console.log(token);
         setToken(token);
+        await fetchUserInfo(token);
         navigate('/home');
     };
     const logout = () => {
         setToken(null);
+        setUserInfo(null);
         navigate('/');
+    };
+
+    const fetchUserInfo = async (token) => {
+        try {
+            const response = await fetch('http://localhost:8888/user', {
+                headers: {
+                    'Authorization': `${token}`
+                }
+            });
+            const data = await response.json();
+            await setUserInfo(data);
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+        }
+
     };
 
     const sharedValues = useMemo(() => {
         return {
             token,
             login,
-            logout
+            logout,
+            userInfo
         };
-    }, [token]);
+    }, [token, userInfo]);
 
     return <AuthContext.Provider value={sharedValues}>{children}</AuthContext.Provider>;
 };
