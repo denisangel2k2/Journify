@@ -1,1 +1,0 @@
-{"duration": 0.009474754333496094, "input_args": {"n_input": "252", "bins_per_octave": "36", "n_chroma": "12", "fmin": "None", "window": "None", "base_c": "True", "dtype": "<class 'numpy.float32'>"}, "time": 1712431591.7998743}
