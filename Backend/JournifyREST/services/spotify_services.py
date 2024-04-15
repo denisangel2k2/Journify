@@ -72,3 +72,11 @@ class SpotifyService:
             return save_path
         except Exception as e:
             print(f"An error occured: {str(e)}")
+
+    def checkToken(self, token):
+        sp = spotipy.Spotify(auth=token)
+        try:
+            sp.current_user()
+            return True
+        except Exception as e:
+            return False

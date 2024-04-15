@@ -12,6 +12,7 @@ from classification.CNNClassifier import CNNClassifier
 from model.Journal import Journal, Question
 from flask_mongoengine import MongoEngine
 
+from services.classifier_service import ClassifierService
 from services.features_extractor import FeaturesExtractor
 from services.journal_services import JournalService
 from services.spotify_services import SpotifyService
@@ -23,12 +24,11 @@ AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 API_BASE_URL = 'https://api.spotify.com/v1/'
 
-
 spotifyService = SpotifyService()
 journalService = JournalService()
 featuresExtractor = FeaturesExtractor()
 cnnClassifier = CNNClassifier()
-
+classifierService = ClassifierService()
 
 app = Flask(__name__)
 
@@ -96,16 +96,6 @@ def get_tracks():
     return songs
 
 
-@app.route('/journal', methods=['POST'])
-def post_journal():
-    journalreceived = request.json
-    journal = Journal.objects(email=journalreceived['email']).first()
-    journal.update(**journalreceived)
-    journal = Journal.objects(email=journalreceived['email']).first()
-
-    return journal.to_json()
-
-
 @app.route('/journal', methods=['PUT'])
 def get_journal():
     # token = request.headers.get('Authorization')
@@ -118,18 +108,18 @@ def get_journal():
     if not journal:
         journalService.getInstance().createJournal(email, spotify_id)
     else:
-        #get date timestamp
+        # get date timestamp
         date = journal.date
-        #get current date timestamp
+        # get current date timestamp
         current_date = datetime.datetime.now().timestamp()
-        #compare if there has been 24 hours since the last journal entry
+        # compare if there has been 24 hours since the last journal entry
         if current_date - date > 100:
             journal = journalService.getInstance().createJournal(email, spotify_id)
-
 
     journal = Journal.objects(spotify_id=spotify_id, email=email, date__gt=10).order_by('-date').exclude('id').first()
     journal = json.loads(journal.to_json())
     return journal
+
 
 @app.route('/history', methods=['GET'])
 def get_history():
@@ -143,12 +133,8 @@ def get_history():
     journals = json.loads(journals.to_json())
     return journals
 
-@app.route('/forwardsong', methods=['POST'])
-def feed_forward_song():
-    song = request.json['song']
-    return spotifyService.getInstance().downloadMp3(song)
 
-@app.route('/classify', methods=['POST'])
+@app.route('/classify_song', methods=['POST'])
 def classify():
     song = request.json['song']
     path = spotifyService.getInstance().downloadMp3(song)
@@ -156,12 +142,36 @@ def classify():
     prediction = cnnClassifier.classify(features)
     return prediction
 
+
+@app.route('/classify', methods=['POST'])
+def update_question():
+    email = request.json['email']
+    spotify_id = request.json['spotify_id']
+    question = request.json['question']
+    index = question['index']
+
+    journal = Journal.objects(email=email, spotify_id=spotify_id).order_by('-date').exclude('id').first()
+    journal.questions[index].answer = question['answer']
+    emotion = classifierService.getInstance().classify(question['answer'])
+    journal.questions[index].emotion = emotion
+    journal.save()
+    return journal.to_json()
+
+@app.route('/report', methods=['GET'])
+def get_report():
+    email = request.json['email']
+    spotify_id = request.json['spotify_id']
+
+    emotion, maxEmotion = journalService.getInstance().getAverageEmotion(email, spotify_id)
+    journal = Journal.objects(email=email, spotify_id=spotify_id).order_by('-date').first().update(set__emotion=maxEmotion)
+    return emotion
+
+
 @app.route('/user', methods=['GET'])
 def get_user_info():
     token = request.headers.get('Authorization')
     userDetails = spotifyService.getInstance().getUserDetails(token)
     return userDetails
-
 
 
 if __name__ == '__main__':

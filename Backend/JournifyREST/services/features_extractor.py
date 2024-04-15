@@ -48,7 +48,8 @@ class FeaturesExtractor:
         return [features['danceability'], features['energy'], features['key'], features['loudness'], features['speechiness'], features['acousticness'], features['instrumentalness'], features['liveness'], features['valence'], features['tempo'], features['time_signature']]
 
 
-
+    def lstmFeatures(self, audio_path):
+        return
 
 
 
