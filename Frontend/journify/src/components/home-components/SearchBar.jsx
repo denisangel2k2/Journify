@@ -1,9 +1,10 @@
-import { TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
+
 import React, { useState } from 'react';
 import { useAuth } from '../../providers/AuthProvider';
 
-const SearchBar = ({ setCurrentSelectedSong }) => {
+const SearchBar = ({ setCurrentSelectedSong }) => { 
     const [songs, setSongs] = useState([]);
     let timeoutId;
     const { token } = useAuth();

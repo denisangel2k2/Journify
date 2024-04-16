@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/components/home.scss';
 import JournalCell from "../components/home-components/JournalCell";
-import { Modal } from 'react-bootstrap';
+import { Modal, ToggleButton } from 'react-bootstrap';
 import UserContainer from '../components/home-components/UserContainer';
 import TableHistory from '../components/home-components/TableHistory';
 import SearchBar from '../components/home-components/SearchBar';
@@ -37,28 +37,50 @@ export const Home = () => {
       console.log('Error fetching cells:', error);
     }
   };
+  const fetchSubmitSong = async () => {
+    const newCells = await fetch('http://localhost:8888/classify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`
+      },
+      body: JSON.stringify({
+        email: userInfo.email,
+        spotify_id: userInfo.id,
+        question: selectedCell,
+        index: selectedCell.index,
+        img: selectedCell.image,
+      })
+    });
+    return newCells.json();
+
+  }
+
+
   useEffect(() => {
-    console.log('HEREEEE' + !cells)
     fetchCells();
+    //TODO: update history list here aswell
   }, [token, userInfo]);
 
   const saveModalChanges = () => {
     setIsModalVisible(false);
-    const newCells = cells;
-    newCells.questions[selectedCell.index].song = currentSelectedSong;
-    //fetch info from the server regarding the classification of the song and update the cell with the image and classification
-    
 
-    setCells(newCells);
+    const copySelectedCell = selectedCell;
+    copySelectedCell.answer = currentSelectedSong.song+ " - " + currentSelectedSong.artist;
+    copySelectedCell.img = currentSelectedSong.image;
+
+    setSelectedCell(copySelectedCell);
+    fetchSubmitSong().then((newCells) => {
+      setCells(newCells);
+    });
   }
 
   const handleClickOnCell = (item) => {
     setIsModalVisible(true);
     setSelectedCell(item);
   }
-  useEffect(() => {
-    console.log(currentSelectedSong);
-  }, [currentSelectedSong]);
+
+
 
   return (
     <>
@@ -71,6 +93,7 @@ export const Home = () => {
           <SearchBar setCurrentSelectedSong={setCurrentSelectedSong}></SearchBar>
         </Modal.Body>
         <Modal.Footer>
+          <button onClick={() => { saveModalChanges() }}>Submit</button>
           <button onClick={() => { setIsModalVisible(false) }}>Close</button>
         </Modal.Footer>
       </Modal>
