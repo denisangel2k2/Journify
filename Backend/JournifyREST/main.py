@@ -114,7 +114,9 @@ def get_journal():
         current_date = datetime.datetime.now().timestamp()
         # compare if there has been 24 hours since the last journal entry
         if current_date - date > 100:
+            #TODO: classify the songs for the current journal before creating a new journal
             journal = journalService.getInstance().createJournal(email, spotify_id)
+
 
     journal = Journal.objects(spotify_id=spotify_id, email=email, date__gt=10).order_by('-date').exclude('id').first()
     journal = json.loads(journal.to_json())
@@ -145,18 +147,27 @@ def classify():
 
 @app.route('/classify', methods=['POST'])
 def update_question():
+    print(request.json)
     email = request.json['email']
     spotify_id = request.json['spotify_id']
     question = request.json['question']
     index = question['index']
 
-    journal = Journal.objects(email=email, spotify_id=spotify_id).order_by('-date').exclude('id').first()
+    journal = Journal.objects(email=email, spotify_id=spotify_id).order_by('-date').first()
     journal.questions[index].answer = question['answer']
+    journal.questions[index].img = question['img']
+
     emotion = classifierService.getInstance().classify(question['answer'])
     journal.questions[index].emotion = emotion
-    journal.save()
-    return journal.to_json()
 
+    journal.save()
+    journal = Journal.objects(email=email, spotify_id=spotify_id).order_by('-date').first()
+
+    return journal.to_json()
+@app.route('/recommendations', methods=['GET'])
+def get_recommendations():
+    token = request.headers.get('Authorization')
+    return spotifyService.getInstance().getRecommendations(token)
 @app.route('/report', methods=['GET'])
 def get_report():
     email = request.json['email']
