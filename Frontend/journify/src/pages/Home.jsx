@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/components/home.scss';
 import JournalCell from "../components/home-components/JournalCell";
-import { Modal, ToggleButton } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 import UserContainer from '../components/home-components/UserContainer';
 import TableHistory from '../components/home-components/TableHistory';
 import SearchBar from '../components/home-components/SearchBar';
@@ -81,7 +81,6 @@ export const Home = () => {
   }
 
 
-
   return (
     <>
       <Modal show={isModalVisible}>
@@ -90,6 +89,8 @@ export const Home = () => {
         </Modal.Header>
         <Modal.Body>
           <p>{selectedCell.question}</p>
+          <p>{selectedCell.answer}</p>
+          <p>{selectedCell.emotion}</p>
           <SearchBar setCurrentSelectedSong={setCurrentSelectedSong}></SearchBar>
         </Modal.Body>
         <Modal.Footer>

@@ -61,8 +61,24 @@
     background-color: shared.$darkest-color;
     margin-bottom: 1%;
     border-radius: .5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    overflow-x: auto;
 }
+.journal-table-history {
+    min-width: 8rem;
+    height: 70%;
+    background-color: shared.$dark-color;
+    margin: 1rem;
+    border-radius: 1rem;
+    &:hover {
+        transform: scale(1.03);
+        transition: 0.25s ease-in-out;
+        cursor: pointer;
+    }
 
+}
 .user-container {
     border-radius: .5rem;
     height: 100%;
@@ -149,7 +165,29 @@
 
 .emotions-icon {
     color: shared.$main-color;
+}
+.journal-banner { 
     position: absolute;
-    top: 1rem;
+    width: 2rem;
+    height: 3rem;
+    background-color: shared.$darkest-color;
     right: 1rem;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 3px 5px 0 0 rgba(0, 0, 0, 0.06);
+    &:after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-left: 1rem solid transparent;
+        border-right: 1rem solid transparent;
+        border-top: 1rem solid shared.$darkest-color;
+        bottom: -1rem;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
 }

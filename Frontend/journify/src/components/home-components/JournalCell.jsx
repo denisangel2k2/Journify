@@ -12,12 +12,13 @@ const JournalCell = ({ onClick, item }) => {
                 
             }
 
-            {item.emotion === 'Happy' &&  <TagFacesIcon className="emotions-icon"/> }
-            {item.emotion === 'Sad' &&  <SentimentDissatisfiedIcon className="emotions-icon" /> }
-            {item.emotion === 'Energetic' &&  <OfflineBoltIcon className="emotions-icon"/> }
-            {item.emotion === 'Calm' &&  <SelfImprovementIcon className="emotions-icon"/> }
-            {item.emotion === 'not set' && item.answer!=='not set' && <QuestionMarkIcon className="emotions-icon"/> }
-
+            <div className='journal-banner'>
+                {item.emotion === 'Happy' &&  <TagFacesIcon className="emotions-icon"/> }
+                {item.emotion === 'Sad' &&  <SentimentDissatisfiedIcon className="emotions-icon" /> }
+                {item.emotion === 'Energetic' &&  <OfflineBoltIcon className="emotions-icon"/> }
+                {item.emotion === 'Calm' &&  <SelfImprovementIcon className="emotions-icon"/> }
+                {item.emotion === 'not set' && item.answer!=='not set' && <QuestionMarkIcon className="emotions-icon"/> }
+            </div>
         </div>
     );
 }
