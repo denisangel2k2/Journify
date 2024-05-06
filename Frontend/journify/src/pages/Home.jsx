@@ -6,13 +6,17 @@ import UserContainer from '../components/home-components/UserContainer';
 import TableHistory from '../components/home-components/TableHistory';
 import SearchBar from '../components/home-components/SearchBar';
 import { useAuth, useLocalStorage } from '../providers/AuthProvider';
+import HistoryJournalSongs from '../components/home-components/HistoryJournalSongs';
 
 export const Home = () => {
   const [cells, setCells] = useLocalStorage('cells', []);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isHistoryModalVisible, setIsHistoryModalVisible] = useState(false);
   const [selectedCell, setSelectedCell] = useState({});
   const [currentSelectedSong, setCurrentSelectedSong] = useState(null);
   const { token, userInfo } = useAuth();
+  const [history, setHistory] = useLocalStorage('history', []);
+  const [currentSelectedJournal, setCurrentSelectedJournal] = useState({});
 
   const fetchCells = async () => {
     try {
@@ -54,19 +58,45 @@ export const Home = () => {
     });
     return newCells.json();
 
-  }
+  };
+
+  const fetchJournalHistory = async () => {
+    try {
+      const history = await fetch('http://localhost:8888/history', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token}`
+        },
+        body: JSON.stringify({
+          email: userInfo.email,
+          spotify_id: userInfo.id
+        })
+      });
+
+      if (!history.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const data = await history.json();
+      setHistory(data);
+    }
+    catch (error) {
+      console.log('Error fetching history:', error);
+    }
+
+  };
 
 
   useEffect(() => {
     fetchCells();
-    //TODO: update history list here aswell
+    fetchJournalHistory();
   }, [token, userInfo]);
 
   const saveModalChanges = () => {
     setIsModalVisible(false);
 
     const copySelectedCell = selectedCell;
-    copySelectedCell.answer = currentSelectedSong.song+ " - " + currentSelectedSong.artist;
+    copySelectedCell.answer = currentSelectedSong.song + " - " + currentSelectedSong.artist;
     copySelectedCell.img = currentSelectedSong.image;
 
     setSelectedCell(copySelectedCell);
@@ -83,7 +113,7 @@ export const Home = () => {
 
   return (
     <>
-      <Modal show={isModalVisible}>
+      <Modal show={isModalVisible} id="modal-song">
         <Modal.Header>
           <Modal.Title>{selectedCell.index + 1}</Modal.Title>
         </Modal.Header>
@@ -98,6 +128,16 @@ export const Home = () => {
           <button onClick={() => { setIsModalVisible(false) }}>Close</button>
         </Modal.Footer>
       </Modal>
+
+      <Modal show={isHistoryModalVisible} id="modal-history" style={{ maxWidth: '90%', maxHeight: '90%' }}>
+        <Modal.Body>
+          <HistoryJournalSongs journal={currentSelectedJournal} />
+        </Modal.Body>
+        <Modal.Footer>
+          <button onClick={() => { setIsHistoryModalVisible(false) }}>Close</button>
+        </Modal.Footer>
+      </Modal>
+
       <div class="home-background">
         <div className="upper-container">
           <UserContainer />
@@ -114,7 +154,7 @@ export const Home = () => {
 
           </div>
         </div>
-        <TableHistory />
+        <TableHistory setIsHistoryModalVisible={setIsHistoryModalVisible} history={history} setCurrentSelectedJournal={setCurrentSelectedJournal} />
       </div>
     </>
 

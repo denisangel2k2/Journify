@@ -1,0 +1,81 @@
+import React, { useEffect, useState, useRef } from 'react';
+import { useAuth } from '../../providers/AuthProvider';
+import Chart from 'chart.js/auto';
+
+const RadarChartAllJournals = () => {
+    const { token, userInfo } = useAuth();
+    const [report, setReport] = useState(null);
+    const chartRef = useRef(null);
+
+    useEffect(() => {
+        const fetchReport = async () => {   
+            const data = await fetch('http://localhost:8888/all_report', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `${token}`
+                },
+                body: JSON.stringify({
+                  email: userInfo.email,
+                  spotify_id: userInfo.id
+                })
+            });
+           
+            const reportData = await data.json();
+            setReport(reportData);
+        };
+
+        if (userInfo && token) {
+            fetchReport();
+        }
+    }, [token, userInfo]); 
+
+    useEffect(() => {
+        if (report) {
+            if (chartRef.current) {
+                chartRef.current.destroy(); //Destroy existing chart if it exists
+            }
+            const radarChart = document.getElementById('radarChart').getContext('2d');
+            chartRef.current = new Chart(radarChart, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(report),
+                    datasets: [{
+                        label: 'All Journals Report',
+                        data: Object.values(report),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(255, 255, 255, 1)', 
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    elements: {
+                        line: {
+                            borderColor: 'rgba(255, 255, 255, 1)' 
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 1)', 
+                            },
+                            pointLabels: {
+                                display: true, 
+                            },
+                            ticks: {
+                                display: false, 
+                            }
+                        }
+                    }
+                }
+                
+            });
+        }
+    }, [report]); 
+
+    return (
+        <canvas id="radarChart" width="400" height="400"></canvas>
+    );
+};
+
+export default RadarChartAllJournals;

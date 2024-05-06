@@ -50,7 +50,8 @@ const SearchBar = ({ setCurrentSelectedSong }) => {
                     <TextField
                         {...params}
                         variant="outlined"
-                        label="Search Box"
+                        label="Search Song"
+                        className="search-bar"
                         style={{ color: 'white', borderRadius: 5 }}
                         onChange={handleInputChange}
                     />
