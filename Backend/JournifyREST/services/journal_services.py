@@ -48,3 +48,20 @@ class JournalService:
         maxEmotion = max(occurancesEmotions, key=occurancesEmotions.get)
 
         return occurancesEmotions, maxEmotion
+
+    def getAllEmotions(self,email,spotify_id):
+        journals= Journal.objects(email=email, spotify_id=spotify_id).exclude('id')
+        emotions=[]
+        for journal in journals:
+            for question in journal.questions:
+                emotions.append(question.emotion)
+
+        occurancesEmotions = {
+            'Happy': emotions.count('Happy'),
+            'Sad': emotions.count('Sad'),
+            'Energetic': emotions.count('Energetic'),
+            'Calm': emotions.count('Calm')
+        }
+        return occurancesEmotions
+
+

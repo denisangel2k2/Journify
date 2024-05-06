@@ -113,7 +113,7 @@ def get_journal():
         # get current date timestamp
         current_date = datetime.datetime.now().timestamp()
         # compare if there has been 24 hours since the last journal entry
-        if current_date - date > 100:
+        if current_date - date > 3600:
             #TODO: classify the songs for the current journal before creating a new journal
             journal = journalService.getInstance().createJournal(email, spotify_id)
 
@@ -123,15 +123,17 @@ def get_journal():
     return journal
 
 
-@app.route('/history', methods=['GET'])
+@app.route('/history', methods=['PUT'])
 def get_history():
     # token = request.headers.get('Authorization')
     # email, spotify_id = spotifyService.getInstance().getEmailAndSpotifyId(token)
 
     email = request.json['email']
     spotify_id = request.json['spotify_id']
+    current_timestamp= datetime.datetime.now().timestamp()
+    offset=(current_timestamp-150)
+    journals = Journal.objects(spotify_id=spotify_id, email=email, date__lt=offset).order_by('-date').exclude('id')
 
-    journals = Journal.objects(email=email, spotify_id=spotify_id).exclude('id').all()
     journals = json.loads(journals.to_json())
     return journals
 
@@ -142,7 +144,7 @@ def classify():
     path = spotifyService.getInstance().downloadMp3(song)
     features = featuresExtractor.getInstance().cnnFeatures(path)
     prediction = cnnClassifier.classify(features)
-    return prediction
+    return path
 
 
 @app.route('/classify', methods=['POST'])
@@ -168,7 +170,7 @@ def update_question():
 def get_recommendations():
     token = request.headers.get('Authorization')
     return spotifyService.getInstance().getRecommendations(token)
-@app.route('/report', methods=['GET'])
+@app.route('/report', methods=['POST'])
 def get_report():
     email = request.json['email']
     spotify_id = request.json['spotify_id']
@@ -176,6 +178,14 @@ def get_report():
     emotion, maxEmotion = journalService.getInstance().getAverageEmotion(email, spotify_id)
     journal = Journal.objects(email=email, spotify_id=spotify_id).order_by('-date').first().update(set__emotion=maxEmotion)
     return emotion
+
+@app.route('/all_report', methods=['POST'])
+def get_report_all():
+    email = request.json['email']
+    spotify_id = request.json['spotify_id']
+
+    emotions = journalService.getInstance().getAllEmotions(email, spotify_id)
+    return emotions
 
 
 @app.route('/user', methods=['GET'])

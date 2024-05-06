@@ -50,19 +50,27 @@ class SpotifyService:
             url, duration, _ = self.__getUrlForSong(song_name)
             print(url, duration)
             yt = YouTube(url)
+            #in C:\Users\denis\AppData\Local\Programs\Python\Python311\Lib\site-packages\pytube\cipher.py
+            #you should change line 30 from re.compile(r"^\$*\w+\W") to re.compile(r"^\w+\W") or vice-versa if problems occur
             video_stream = yt.streams.filter(file_extension='mp4').first()
 
+            print('video stream')
             video_content = requests.get(video_stream.url)
+
+            print('video content')
             with tempfile.NamedTemporaryFile(delete=False) as temp_file:
                 temp_file.write(video_content.content)
                 temp_file_path = temp_file.name
 
+            print(temp_file_path)
             video = VideoFileClip(temp_file_path, audio=True)
+
             audio = video.audio
 
             duration = int(yt.length)
             start_time = duration // 4
             end_time = start_time + 30
+            print(duration, start_time, end_time)
 
             audio_segment = audio.subclip(start_time, end_time)
             base_filename = yt.title
