@@ -1,17 +1,18 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../providers/AuthProvider';
 const AuthCallbackPage = () => {
-    const { login } = useAuth();
+    const { login, } = useAuth();
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const accessToken = urlParams.get('access_token');
-        const expiresIn = urlParams.get('expires_in');
+        const expiresAt = urlParams.get('expires_at');
+        const refreshToken = urlParams.get('refresh_token');
 
         if (accessToken) {
-            login(accessToken); 
-            localStorage.setItem('expiresIn', expiresIn);
+            login(accessToken, expiresAt, refreshToken); 
+            // localStorage.setItem('expiresIn', expiresIn);
+            // localStorage.setItem('refreshToken', refreshToken);
         }
-
     }, []);
 
     return (

@@ -20,6 +20,9 @@ from services.spotify_services import SpotifyService
 SPOTIFY_REDIRECT_URI = 'http://localhost:8888/callback'
 SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
+REFRESH_TIME = 86400
+
+
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 API_BASE_URL = 'https://api.spotify.com/v1/'
@@ -31,16 +34,6 @@ cnnClassifier = CNNClassifier()
 classifierService = ClassifierService()
 
 app = Flask(__name__)
-
-# app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
-# app.config['CORS_HEADERS'] = 'Content-Type'
-# app.config['MONGODB_SETTINGS'] = [
-#     {
-#         'db': 'journal',
-#         'host': 'localhost',
-#         'port': 27017
-#     }
-#
 
 app.config.from_pyfile('config.py')
 db = MongoEngine(app)
@@ -73,15 +66,32 @@ def callback():
             'client_id': SPOTIFY_CLIENT_ID,
             'client_secret': SPOTIFY_CLIENT_SECRET,
             'show_dialog': True
-
         }
         response = requests.post(TOKEN_URL, data=req_body)
         access_token = response.json()['access_token']
+        refresh_token = response.json()['refresh_token']
         expires = response.json()['expires_in']
         expires += datetime.datetime.now().timestamp()
-        return redirect(f'http://localhost:3000/callback?access_token={access_token}&expires_in={expires}')
+        return redirect(f'http://localhost:3000/callback?access_token={access_token}&expires_at={expires}&refresh_token={refresh_token}')
 
+@app.route('/refresh_token', methods=['POST'])
+def refresh_token():
+    refresh_token = request.json['refresh_token']
+    access_token = request.headers.get('Authorization')
 
+    req_body = {
+        'grant_type': 'refresh_token',
+        'refresh_token': refresh_token,
+        'client_id': SPOTIFY_CLIENT_ID,
+        'client_secret': SPOTIFY_CLIENT_SECRET
+    }
+    response = requests.post(TOKEN_URL, data=req_body)
+    access_token = response.json()['access_token']
+    expires = response.json()['expires_in']
+    expires += datetime.datetime.now().timestamp()
+    return jsonify({'access_token': access_token, 'expires_at': expires})
+
+#move to service
 @app.route('/songs')
 def get_tracks():
     access_token = request.headers.get('Authorization')
@@ -113,8 +123,9 @@ def get_journal():
         # get current date timestamp
         current_date = datetime.datetime.now().timestamp()
         # compare if there has been 24 hours since the last journal entry
-        if current_date - date > 3600:
+        if current_date - date > REFRESH_TIME:
             #TODO: classify the songs for the current journal before creating a new journal
+
             journal = journalService.getInstance().createJournal(email, spotify_id)
 
 
@@ -131,7 +142,7 @@ def get_history():
     email = request.json['email']
     spotify_id = request.json['spotify_id']
     current_timestamp= datetime.datetime.now().timestamp()
-    offset=(current_timestamp-150)
+    offset=(current_timestamp-REFRESH_TIME)
     journals = Journal.objects(spotify_id=spotify_id, email=email, date__lt=offset).order_by('-date').exclude('id')
 
     journals = json.loads(journals.to_json())

@@ -8,6 +8,9 @@ const AuthContext = React.createContext();
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useLocalStorage("token", null);
     const [userInfo, setUserInfo] = useLocalStorage("userInfo", null);
+    const [expiresAt, setExpiresAt] = useLocalStorage("expiresAt", null); 
+    const [refreshToken, setRefreshToken] = useLocalStorage("refreshToken", null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -18,8 +21,9 @@ export const AuthProvider = ({ children }) => {
         }
     }, [token]); 
 
-    const login = async (token) => {
-        console.log(token);
+    const login = async (token,expires_at,refresh_token) => {
+        setExpiresAt(expires_at);
+        setRefreshToken(refresh_token);
         setToken(token);
         await fetchUserInfo(token);
         navigate('/home');
@@ -48,6 +52,11 @@ export const AuthProvider = ({ children }) => {
     const sharedValues = useMemo(() => {
         return {
             token,
+            setToken,
+            setExpiresAt,
+            expiresAt,
+            refreshToken,
+            setRefreshToken,
             login,
             logout,
             userInfo
@@ -72,9 +81,6 @@ export const useLocalStorage = (keyName, defaultValue) => {
             if (value) {
                 return JSON.parse(value);
             } else {
-                if (window.localStorage.getItem("expiresIn") > 0) {
-                    return defaultValue;
-                }
                 window.localStorage.setItem(keyName, JSON.stringify(defaultValue));
                 return defaultValue;
             }

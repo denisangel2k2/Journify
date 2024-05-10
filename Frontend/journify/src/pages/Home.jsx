@@ -18,6 +18,9 @@ export const Home = () => {
   const [history, setHistory] = useLocalStorage('history', []);
   const [currentSelectedJournal, setCurrentSelectedJournal] = useState({});
 
+  const {setToken, refreshToken, setExpiresAt,expiresAt} = useAuth();
+
+
   const fetchCells = async () => {
     try {
       const journal = await fetch('http://localhost:8888/journal', {
@@ -59,7 +62,6 @@ export const Home = () => {
     return newCells.json();
 
   };
-
   const fetchJournalHistory = async () => {
     try {
       const history = await fetch('http://localhost:8888/history', {
@@ -85,13 +87,47 @@ export const Home = () => {
     }
 
   };
+  const fetchNewToken = async () => {
+    try {
+      const response = await fetch('http://localhost:8888/refresh_token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token}`
+        },
+        body: JSON.stringify({
+          refresh_token: refreshToken
+        }),
+      });
 
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const data = await response.json();
+      setToken(data.access_token);
+      setExpiresAt(data.expires_at);
+    }
+    catch (error) { 
+      console.log('Error fetching new token:', error);
+    }
+  }
+
+  useEffect(() => {
+    const currentTimeStamp = Date.now() / 1000;
+    console.log(currentTimeStamp-expiresAt)
+    if (currentTimeStamp >= expiresAt) 
+    {
+      fetchNewToken();
+    }
+  
+  },[refreshToken]);
 
   useEffect(() => {
     fetchCells();
     fetchJournalHistory();
   }, [token, userInfo]);
 
+ 
   const saveModalChanges = () => {
     setIsModalVisible(false);
 
@@ -110,17 +146,19 @@ export const Home = () => {
     setSelectedCell(item);
   }
 
-
   return (
     <>
       <Modal show={isModalVisible} id="modal-song">
         <Modal.Header>
-          <Modal.Title>{selectedCell.index + 1}</Modal.Title>
+          <Modal.Title>Quote #{selectedCell.index + 1}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>{selectedCell.question}</p>
-          <p>{selectedCell.answer}</p>
-          <p>{selectedCell.emotion}</p>
+          <div className="container">
+            <p>{selectedCell.question}</p>
+            {selectedCell.answer !== 'not set' && <p>Answer: {selectedCell.answer}</p>}
+            {selectedCell.emotion !== 'not set' && <p>Emotion: {selectedCell.emotion}</p>}
+          </div>
+
           <SearchBar setCurrentSelectedSong={setCurrentSelectedSong}></SearchBar>
         </Modal.Body>
         <Modal.Footer>
@@ -129,7 +167,8 @@ export const Home = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={isHistoryModalVisible} id="modal-history" style={{ maxWidth: '90%', maxHeight: '90%' }}>
+      <Modal show={isHistoryModalVisible} id="modal-history" style={{ maxWidth: '100%', maxHeight: '100%' }}>
+
         <Modal.Body>
           <HistoryJournalSongs journal={currentSelectedJournal} />
         </Modal.Body>
@@ -142,6 +181,8 @@ export const Home = () => {
         <div className="upper-container">
           <UserContainer />
           <div className="main-container">
+            <h1>Your Journify for today</h1>
+
             <div className="table-container">
               {cells?.questions && cells.questions.map(cell => (
                 <JournalCell

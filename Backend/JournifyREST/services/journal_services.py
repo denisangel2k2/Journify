@@ -49,9 +49,9 @@ class JournalService:
 
         return occurancesEmotions, maxEmotion
 
-    def getAllEmotions(self,email,spotify_id):
-        journals= Journal.objects(email=email, spotify_id=spotify_id).exclude('id')
-        emotions=[]
+    def getAllEmotions(self, email, spotify_id):
+        journals = Journal.objects(email=email, spotify_id=spotify_id).exclude('id')
+        emotions = []
         for journal in journals:
             for question in journal.questions:
                 emotions.append(question.emotion)
@@ -62,6 +62,12 @@ class JournalService:
             'Energetic': emotions.count('Energetic'),
             'Calm': emotions.count('Calm')
         }
+        totalCount = sum(occurancesEmotions.values())
+
+        if (totalCount == 0):
+            return occurancesEmotions
+
+        for key in occurancesEmotions:
+            occurancesEmotions[key] = (occurancesEmotions[key] / totalCount) * 100
+
         return occurancesEmotions
-
-

@@ -9,11 +9,10 @@ import 'swiper/css/pagination';
 import { Navigation, Pagination, FreeMode } from 'swiper/modules';
 
 const HistoryJournalSongs = ({ journal }) => {
-    console.log('JOURNAL HERE', journal);
     return (
         <div className='history-journal-songs'>
             <Swiper
-                modules={[Navigation,Pagination, FreeMode]}
+                modules={[Navigation, Pagination, FreeMode]}
                 navigation={true}
                 pagination={{ clickable: true }}
                 className="myHistoryJournalSongsSwiper"
@@ -24,10 +23,21 @@ const HistoryJournalSongs = ({ journal }) => {
                 {journal.questions.map((question) => (
                     <SwiperSlide>
                         <div className="journal-history-song">
-                            <img src={question.img} alt={`Song cover for ${question.answer}`}></img>
-                            <p>{question.question}</p>
-                            <p>{question.answer}</p>
-                            <p>{question.emotion}</p>
+                            {question.img &&
+                                <>  
+                                    <img src={question.img} alt={`Song cover for ${question.answer}`}></img>
+                                    <p className='quote'>{question.question}</p>
+                                    <p>Answer: {question.answer}</p>
+                                    <p>Emotion: {question.emotion}</p>
+                                </>
+                            }
+                            {!question.img && 
+                            <>
+                                <div className='img-placeholder'>No cover art for song found</div>
+                                <p className='quote'>{question.question}</p>
+                                <p>You haven't matched a song to this quote.</p>    
+                            </>}
+
                         </div>
                     </SwiperSlide>
                 ))}

@@ -2,9 +2,10 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../providers/AuthProvider';
 import Chart from 'chart.js/auto';
 
-const RadarChartAllJournals = () => {
+const RadarChartAllJournals = ({cells}) => {
     const { token, userInfo } = useAuth();
     const [report, setReport] = useState(null);
+
     const chartRef = useRef(null);
 
     useEffect(() => {
@@ -28,12 +29,12 @@ const RadarChartAllJournals = () => {
         if (userInfo && token) {
             fetchReport();
         }
-    }, [token, userInfo]); 
+    }, [token, userInfo, cells]); 
 
     useEffect(() => {
         if (report) {
             if (chartRef.current) {
-                chartRef.current.destroy(); //Destroy existing chart if it exists
+                chartRef.current.destroy(); // Destroy existing chart if it exists
             }
             const radarChart = document.getElementById('radarChart').getContext('2d');
             chartRef.current = new Chart(radarChart, {
@@ -49,6 +50,21 @@ const RadarChartAllJournals = () => {
                     }]
                 },
                 options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'All Journals Report', // Title for the chart
+                            fontSize: 20
+                        },
+                        legend: {
+                            display: true,
+                            position: 'bottom', // Positioning the legend at the bottom
+                            labels: {
+                                boxWidth: 20, // Width of each legend box
+                                padding: 20, // Padding between legend items
+                            }
+                        }
+                    },
                     elements: {
                         line: {
                             borderColor: 'rgba(255, 255, 255, 1)' 
@@ -68,10 +84,10 @@ const RadarChartAllJournals = () => {
                         }
                     }
                 }
-                
             });
         }
-    }, [report]); 
+    }, [report,cells]); 
+    
 
     return (
         <canvas id="radarChart" width="400" height="400"></canvas>

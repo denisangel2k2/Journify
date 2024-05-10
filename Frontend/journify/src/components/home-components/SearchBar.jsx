@@ -29,9 +29,8 @@ const SearchBar = ({ setCurrentSelectedSong }) => {
     }
     const handleInputChange = (event) => {
         const input = event.target.value;
-        clearTimeout(timeoutId); // Clear previous timeout
+        clearTimeout(timeoutId); 
 
-        // Set new timeout to call fetchSongs after 500 milliseconds of user inactivity
         timeoutId = setTimeout(() => {
             fetchSongs(input);
         }, 500);
