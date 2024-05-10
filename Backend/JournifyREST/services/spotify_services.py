@@ -89,6 +89,20 @@ class SpotifyService:
         except Exception as e:
             return False
 
+    def getSongsStartingWith(self, token, search_query):
+        sp = spotipy.Spotify(auth=token)
+        results = sp.search(q='track:' + search_query, type='track', limit=3)
+        songs = []
+        for track in results['tracks']['items']:
+            songs.append({'id': track['id'], 'song': track['name'], 'artist': track['artists'][0]['name'],
+                          'image': track['album']['images'][0]['url']})
+
+        results = sp.search(q='artist:' + search_query, type='track', limit=2)
+        for track in results['tracks']['items']:
+            songs.append({'id': track['id'], 'song': track['name'], 'artist': track['artists'][0]['name'],
+                          'image': track['album']['images'][0]['url']})
+        return songs
+
     def getSongRecommendations(self, token):
         sp = spotipy.Spotify(auth=token)
         recommendations = sp.recommendations(seed_genres=['pop', 'rock', 'hip-hop', 'jazz', 'classical', 'blues'], limit=3)

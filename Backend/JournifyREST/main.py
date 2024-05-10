@@ -96,13 +96,7 @@ def refresh_token():
 def get_tracks():
     access_token = request.headers.get('Authorization')
     search_query = request.args.get('searchName')
-    sp = spotipy.Spotify(auth=access_token)
-    results = sp.search(q='track:' + search_query, type='track', limit=5)
-    track_names = [track['name'] for track in results['tracks']['items']]
-    songs = []
-    for track in results['tracks']['items']:
-        songs.append({'id': track['id'], 'song': track['name'], 'artist': track['artists'][0]['name'],
-                      'image': track['album']['images'][0]['url']})
+    songs = spotifyService.getInstance().getSongsStartingWith(access_token, search_query)
     return songs
 
 

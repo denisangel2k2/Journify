@@ -1,4 +1,5 @@
 from classification.CNNClassifier import CNNClassifier
+from classification.LSTMClassifier import LSTMClassifier
 from services.features_extractor import FeaturesExtractor
 from services.spotify_services import SpotifyService
 
@@ -6,7 +7,8 @@ from services.spotify_services import SpotifyService
 class ClassifierService:
     _instance = None
 
-    cnnClassifier = CNNClassifier()
+    # cnnClassifier = CNNClassifier()
+    lstmClassifier = LSTMClassifier()
     featuresExtractor = FeaturesExtractor()
     spotifyService = SpotifyService()
 
@@ -20,8 +22,8 @@ class ClassifierService:
 
     def classify(self, song):
         path = self.spotifyService.getInstance().downloadMp3(song)
-        features = self.featuresExtractor.cnnFeatures(path)
-        prediction = self.cnnClassifier.classify(features)
+        features = self.featuresExtractor.lstmFeatures(path)
+        prediction = self.lstmClassifier.classify(features)
         return prediction
 
 
