@@ -1,5 +1,6 @@
 from classification.CNNClassifier import CNNClassifier
 from classification.LSTMClassifier import LSTMClassifier
+from classification.SpotifyClassifier import SpotifyClassifier
 from services.features_extractor import FeaturesExtractor
 from services.spotify_services import SpotifyService
 
@@ -10,6 +11,7 @@ class ClassifierService:
     # cnnClassifier = CNNClassifier()
     lstmClassifier = LSTMClassifier()
     featuresExtractor = FeaturesExtractor()
+    spotifyClassifier = SpotifyClassifier()
     spotifyService = SpotifyService()
 
     def __new__(cls, *args, **kwargs):
@@ -26,4 +28,7 @@ class ClassifierService:
         prediction = self.lstmClassifier.classify(features)
         return prediction
 
-
+    def backup_classify(self, token, song):
+        features = self.featuresExtractor.spotifyFeatures(token, song)
+        prediction = self.spotifyClassifier.classify(features)
+        return prediction

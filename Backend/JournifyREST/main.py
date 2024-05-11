@@ -77,7 +77,7 @@ def callback():
 @app.route('/refresh_token', methods=['POST'])
 def refresh_token():
     refresh_token = request.json['refresh_token']
-    access_token = request.headers.get('Authorization')
+    # access_token = request.headers.get('Authorization')
 
     req_body = {
         'grant_type': 'refresh_token',
@@ -91,7 +91,6 @@ def refresh_token():
     expires += datetime.datetime.now().timestamp()
     return jsonify({'access_token': access_token, 'expires_at': expires})
 
-#move to service
 @app.route('/songs')
 def get_tracks():
     access_token = request.headers.get('Authorization')
@@ -149,12 +148,15 @@ def classify():
     path = spotifyService.getInstance().downloadMp3(song)
     features = featuresExtractor.getInstance().cnnFeatures(path)
     prediction = cnnClassifier.classify(features)
-    return path
+    resp= {'prediction': prediction}
+    return resp
 
 
 @app.route('/classify', methods=['POST'])
 def update_question():
     print(request.json)
+
+    token = request.headers.get('Authorization')
     email = request.json['email']
     spotify_id = request.json['spotify_id']
     question = request.json['question']
@@ -164,7 +166,12 @@ def update_question():
     journal.questions[index].answer = question['answer']
     journal.questions[index].img = question['img']
 
-    emotion = classifierService.getInstance().classify(question['answer'])
+
+    try:
+        emotion = classifierService.getInstance().classify(question['answer'])
+    except Exception as e:
+        emotion = classifierService.getInstance().backup_classify(token=token, song=question['answer'])
+
     journal.questions[index].emotion = emotion
 
     journal.save()
