@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../providers/AuthProvider';
 import Chart from 'chart.js/auto';
+import { fetchPieChartReportFromAPI } from '../../providers/API';
 
 const PieChartLatestJournal = ({cells}) => {
     const { token, userInfo } = useAuth();
@@ -9,19 +10,7 @@ const PieChartLatestJournal = ({cells}) => {
 
     useEffect(() => {
         const fetchReport = async () => {   
-            const data = await fetch('http://localhost:8888/report', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `${token}`
-                },
-                body: JSON.stringify({
-                  email: userInfo.email,
-                  spotify_id: userInfo.id
-                })
-            });
-           
-            const reportData = await data.json();
+            const reportData = await fetchPieChartReportFromAPI(token, userInfo);
             setReport(reportData);
         };
 

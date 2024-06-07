@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../providers/AuthProvider';
 import Chart from 'chart.js/auto';
+import { fetchRadarChartReportFromAPI } from '../../providers/API';
 
 const RadarChartAllJournals = ({cells}) => {
     const { token, userInfo } = useAuth();
@@ -10,19 +11,7 @@ const RadarChartAllJournals = ({cells}) => {
 
     useEffect(() => {
         const fetchReport = async () => {   
-            const data = await fetch('http://localhost:8888/all_report', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `${token}`
-                },
-                body: JSON.stringify({
-                  email: userInfo.email,
-                  spotify_id: userInfo.id
-                })
-            });
-           
-            const reportData = await data.json();
+            const reportData = await fetchRadarChartReportFromAPI(token, userInfo);
             setReport(reportData);
         };
 

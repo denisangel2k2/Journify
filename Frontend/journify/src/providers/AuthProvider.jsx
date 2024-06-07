@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchUser } from './API';
 
 const AuthContext = React.createContext();
 
@@ -37,11 +38,7 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUserInfo = async (token) => {
         try {
-            const response = await fetch('http://localhost:8888/user', {
-                headers: {
-                    'Authorization': `${token}`
-                }
-            });
+            const response = await fetchUser(token);
             const data = await response.json();
             await setUserInfo(data);
         } catch (error) {

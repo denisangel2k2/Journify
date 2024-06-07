@@ -3,6 +3,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 
 import React, { useState } from 'react';
 import { useAuth } from '../../providers/AuthProvider';
+import { fetchSongsFromAPI } from "../../providers/API";
 
 const SearchBar = ({ setCurrentSelectedSong }) => { 
     const [songs, setSongs] = useState([]);
@@ -11,13 +12,9 @@ const SearchBar = ({ setCurrentSelectedSong }) => {
 
     const fetchSongs = async (startingName) => {
         try {
-            const encodedName = encodeURIComponent(startingName);
-            const response = await fetch(`http://localhost:8888/songs?searchName=${encodedName}`, {
-                headers: {
-                    'Authorization': `${token}`
-                }
-            });
-            const data = await response.json();
+            
+            const response = (await fetchSongsFromAPI(token,startingName));
+            const data= await response.json();
             setSongs(data);
         } catch (error) {
             console.error('Error fetching songs:', error);
