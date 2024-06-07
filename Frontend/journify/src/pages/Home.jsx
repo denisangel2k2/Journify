@@ -7,6 +7,7 @@ import TableHistory from '../components/home-components/TableHistory';
 import SearchBar from '../components/home-components/SearchBar';
 import { useAuth, useLocalStorage } from '../providers/AuthProvider';
 import HistoryJournalSongs from '../components/home-components/HistoryJournalSongs';
+import { fetchCellsFromAPI, fetchSubmitSongFromAPI, fetchJournalHistoryFromAPI, fetchNewTokenFromAPI } from '../providers/API';
 
 export const Home = () => {
   const [cells, setCells] = useLocalStorage('cells', []);
@@ -23,63 +24,35 @@ export const Home = () => {
 
   const fetchCells = async () => {
     try {
-      const journal = await fetch('http://localhost:8888/journal', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `${token}`
-        },
-        body: JSON.stringify({
-          email: userInfo.email,
-          spotify_id: userInfo.id
-        })
-      });
-
-      if (!journal.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data = await journal.json();
+      
+      const data = await fetchCellsFromAPI(token, userInfo);
       setCells(data);
     } catch (error) {
       console.log('Error fetching cells:', error);
     }
   };
-  const fetchSubmitSong = async () => {
-    const newCells = await fetch('http://localhost:8888/classify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `${token}`
-      },
-      body: JSON.stringify({
-        email: userInfo.email,
-        spotify_id: userInfo.id,
-        question: selectedCell,
-        index: selectedCell.index,
-        img: selectedCell.image,
-      })
-    });
-    return newCells.json();
+  // const fetchSubmitSong = async () => {
+  //   const newCells = await fetch('http://localhost:8888/classify', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Authorization': `${token}`
+  //     },
+  //     body: JSON.stringify({
+  //       email: userInfo.email,
+  //       spotify_id: userInfo.id,
+  //       question: selectedCell,
+  //       index: selectedCell.index,
+  //       img: selectedCell.image,
+  //     })
+  //   });
+  //   return newCells.json();
 
-  };
+  // };
   const fetchJournalHistory = async () => {
     try {
-      const history = await fetch('http://localhost:8888/history', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `${token}`
-        },
-        body: JSON.stringify({
-          email: userInfo.email,
-          spotify_id: userInfo.id
-        })
-      });
-
-      if (!history.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data = await history.json();
+     
+      const data = await fetchJournalHistoryFromAPI(token, userInfo);
       setHistory(data);
     }
     catch (error) {
@@ -89,21 +62,8 @@ export const Home = () => {
   };
   const fetchNewToken = async () => {
     try {
-      const response = await fetch('http://localhost:8888/refresh_token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `${token}`
-        },
-        body: JSON.stringify({
-          refresh_token: refreshToken
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data = await response.json();
+      
+      const data = await fetchNewTokenFromAPI(token, refreshToken);
       setToken(data.access_token);
       setExpiresAt(data.expires_at);
     }
@@ -136,7 +96,7 @@ export const Home = () => {
     copySelectedCell.img = currentSelectedSong.image;
 
     setSelectedCell(copySelectedCell);
-    fetchSubmitSong().then((newCells) => {
+    fetchSubmitSongFromAPI(token,userInfo,selectedCell).then((newCells) => {
       setCells(newCells);
     });
   }
