@@ -57,7 +57,10 @@ The input is given as three 10-seconds sequences of the song to be classified. T
   FLASK_SECRET_KEY='the quick brown fox jumps over the lazy doggy'
 ```
 - Run the backend server
-- Run the frontend via npm start
+- Run the frontend
+  ```bash
+  cd Frontend/journify | npm start
+  ```
 
 
 # Application Demo
